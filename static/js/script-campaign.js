@@ -1,22 +1,42 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Змінні для зберігання поточного стану
-    let currentTab = localStorage.getItem('campaignActiveTab') || 'npc';
+    let currentTab = localStorage.getItem('campaignActiveTab') || 'npcs';
     
-    // Встановлюємо активну вкладку при завантаженні
-    document.querySelector(`[data-tab="${currentTab}"]`).classList.add('active');
-    document.getElementById(currentTab).classList.add('active');
+    // Перевіряємо, чи існують елементи перед додаванням класів
+    const tabButton = document.querySelector(`[data-tab="${currentTab}"]`);
+    const tabContent = document.getElementById(currentTab);
     
-    // Видаляємо клас active з інших вкладок
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        if (tab.id !== currentTab) {
-            tab.classList.remove('active');
+    if (tabButton && tabContent) {
+        // Встановлюємо активну вкладку при завантаженні
+        tabButton.classList.add('active');
+        tabContent.classList.add('active');
+        
+        // Видаляємо клас active з інших вкладок
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            if (tab.id !== currentTab) {
+                tab.classList.remove('active');
+            }
+        });
+        document.querySelectorAll('.tab-button').forEach(button => {
+            if (button.getAttribute('data-tab') !== currentTab) {
+                button.classList.remove('active');
+            }
+        });
+    } else {
+        console.error(`Не знайдено елементи для вкладки ${currentTab}`);
+        // Встановлюємо першу вкладку як активну, якщо поточна не знайдена
+        const firstTabButton = document.querySelector('.tab-button');
+        if (firstTabButton) {
+            const firstTabId = firstTabButton.getAttribute('data-tab');
+            firstTabButton.classList.add('active');
+            const firstTabContent = document.getElementById(firstTabId);
+            if (firstTabContent) {
+                firstTabContent.classList.add('active');
+                currentTab = firstTabId;
+                localStorage.setItem('campaignActiveTab', currentTab);
+            }
         }
-    });
-    document.querySelectorAll('.tab-button').forEach(button => {
-        if (button.getAttribute('data-tab') !== currentTab) {
-            button.classList.remove('active');
-        }
-    });
+    }
     
     // Ініціалізація пошуку
     const searchInput = document.getElementById('searchInput');
@@ -114,9 +134,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Очищення підсвічування при перемиканні вкладок
+    // Обробка кліків по вкладках
     document.querySelectorAll('.tab-button').forEach(button => {
         button.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            
+            // Зберігаємо активну вкладку в localStorage
+            localStorage.setItem('campaignActiveTab', tabId);
+            currentTab = tabId;
+            
+            // Видаляємо клас active з усіх вкладок
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Додаємо клас active до вибраної вкладки
+            this.classList.add('active');
+            const activeTabContent = document.getElementById(tabId);
+            if (activeTabContent) {
+                activeTabContent.classList.add('active');
+            } else {
+                console.error(`Не знайдено вміст вкладки з id ${tabId}`);
+            }
+            
             // Видаляємо підсвічування
             clearHighlights();
             
