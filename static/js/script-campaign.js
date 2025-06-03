@@ -166,6 +166,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (editModal) {
                 editModal.style.display = 'none';
             }
+            // Закриваємо всі модальні вікна з класом .modal, які є батьківськими для цього хрестика
+            const modalParent = button.closest('.modal');
+            if (modalParent) {
+                modalParent.style.display = 'none';
+            }
         }
     });
 
