@@ -2,6 +2,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, Blueprint, render_template, url_for, send_file, request, flash, redirect, session, abort, current_app, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_user, login_required, current_user, UserMixin, LoginManager, logout_user
+from flask_session import Session
 import json
 from markdown import markdown
 import os
@@ -18,6 +19,22 @@ app = Flask(__name__, static_folder='static')
 app.config['SECRET_KEY'] = 'thisismysecretkeydonotstealit'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///dnd.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Налаштування сесій для забезпечення окремих сесій для кожного користувача
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = False  # Вимикаємо підписування сесій
+# Вимикаємо безпечні cookie для розробки (в продакшені має бути True)
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_FILE_DIR'] = os.path.join(os.path.dirname(__file__), 'flask_session')
+
+# Створюємо директорію для зберігання сесій, якщо вона не існує
+os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
+
+# Ініціалізуємо Flask-Session
+Session(app)
 
 # Створюємо планувальник
 scheduler = BackgroundScheduler()
